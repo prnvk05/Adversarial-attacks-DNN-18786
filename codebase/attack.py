@@ -1,5 +1,5 @@
-#%%
 
+#%%
 import argparse
 import os
 import shutil
@@ -18,7 +18,7 @@ import torchvision.transforms as transforms
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
 #%%
 model = resnet32().cuda()
-checkpoint = torch.load('/root/adversarial/saved_model/resnet32-d509ac18.th')
+checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-d509ac18.th')
 
 state_dict = checkpoint['state_dict']
 
@@ -126,10 +126,10 @@ def test( model, device, test_loader, epsilon ):
                 adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
                 adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
         else:
-            # Save some adv examples for visualization later
-            if len(adv_examples) < 5:
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
+
+            adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
+            data_ex = data.squeeze().detach().cpu().numpy()
+            adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
 
     # Calculate final accuracy for this epsilon
     final_acc = correct/float(len(test_loader))
@@ -141,11 +141,23 @@ def test( model, device, test_loader, epsilon ):
 
 accuracies = []
 examples = []
+epsilons = [0.05,0.1,0.2,0.3,0.4,0.5]
 
 # Run test for each epsilon
-# for eps in epsilons:
+for eps in epsilons:
+    print("running:",eps)
+    acc, ex = test(model, device, val_loader, eps)
+    accuracies.append(acc)
+    examples.append(ex)
+# %%
 
-acc, ex = test(model, device, val_loader, 0.3)
-accuracies.append(acc)
-examples.append(ex)
+
+#%%
+import pickle
+
+with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples.pkl', 'wb') as f:
+    pickle.dump(examples, f)
+# %%
+with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples.pkl', 'rb') as f:
+    mynewlist = pickle.load(f)
 # %%
