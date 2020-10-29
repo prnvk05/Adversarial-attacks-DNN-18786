@@ -58,7 +58,6 @@ print(validation(model,val_loader))
 # %%
 
 # FGSM attack code
-
 def fgsm_attack(image, epsilon, data_grad):
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
@@ -69,7 +68,17 @@ def fgsm_attack(image, epsilon, data_grad):
     # Return the perturbed image
     return perturbed_image
 
+# PGD attack code
+def PGD_attack(image, alpha, data_grad, step):
+    perturbed_image = image
+    for _ in range(step):
+        perturbed_image = perturbed_image*fgsm_attack(perturbed_image, 
+                                                      alpha, data_grad)
 
+    return perturbed_image
+
+        
+    
 
 def test( model, device, test_loader, epsilon ):
 
@@ -111,8 +120,11 @@ def test( model, device, test_loader, epsilon ):
         # Collect datagrad
         data_grad = data.grad.data
 
+        # Call PGD Attack
+        perturbed_data = PGD_attack(data, epsilon, data_grad, 5)
+
         # Call FGSM Attack
-        perturbed_data = fgsm_attack(data, epsilon, data_grad)
+        #perturbed_data = fgsm_attack(data, epsilon, data_grad)
 
         # Re-classify the perturbed image
         output = model(perturbed_data)
@@ -122,9 +134,9 @@ def test( model, device, test_loader, epsilon ):
         if final_pred.item() == target.item():
             correct += 1
             # Special case for saving 0 epsilon examples
-            if (epsilon == 0) and (len(adv_examples) < 5):
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
+            #if (epsilon == 0) and (len(adv_examples) < 5):
+            #    adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
+            #    adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
         else:
 
             adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
@@ -141,7 +153,7 @@ def test( model, device, test_loader, epsilon ):
 
 accuracies = []
 examples = []
-epsilons = [0.05,0.1,0.2,0.3,0.4,0.5]
+epsilons = [0.05]
 
 # Run test for each epsilon
 for eps in epsilons:
