@@ -139,7 +139,6 @@ def test( model, device, test_loader, epsilon ):
             #    adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
             #    adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
         else:
-
             adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
             data_ex = data.squeeze().detach().cpu().numpy()
             adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
@@ -154,7 +153,7 @@ def test( model, device, test_loader, epsilon ):
 
 accuracies = []
 examples = []
-epsilons = [0.05]
+epsilons = [0.2]
 
 # Run test for each epsilon
 for eps in epsilons:
@@ -165,12 +164,24 @@ for eps in epsilons:
 # %%
 
 
-#%%
+# #%%
 import pickle
 
-with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples.pkl', 'wb') as f:
+with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'wb') as f:
     pickle.dump(examples, f)
 # %%
-with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples.pkl', 'rb') as f:
+with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'rb') as f:
     mynewlist = pickle.load(f)
+# %%
+#%%
+import matplotlib.pyplot as plt
+epsilons = [0,0.05,0.1,0.15,0.2,0.25,0.3]
+acc_f = [0.9263,0.3011,0.197,0.1503,0.1237,0.1092,0.1002]
+plt.grid()
+plt.axis([0,0.3,0,1])
+plt.xlabel('epsilon')
+plt.ylabel('accuracy')
+plt.plot(epsilons,acc_f)
+plt.title('FGSM Attack')
+plt.savefig('/root/Adversarial-attacks-DNN-18786/pics/plot.png')
 # %%
