@@ -18,6 +18,7 @@ import torchvision.transforms as transforms
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
 #%%
 model = resnet32().cuda()
+model.eval()
 checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-d509ac18.th')
 
 state_dict = checkpoint['state_dict']
@@ -54,7 +55,7 @@ def validation(model,valid_dataloader):
   return top1_accuracy/total
 
 
-print(validation(model,val_loader))
+#print(validation(model,val_loader))
 # %%
 
 # FGSM attack code
@@ -64,7 +65,8 @@ def fgsm_attack(image, epsilon, data_grad):
     # Create the perturbed image by adjusting each pixel of the input image
     perturbed_image = image + epsilon*sign_data_grad
     # Adding clipping to maintain [0,1] range
-    perturbed_image = torch.clamp(perturbed_image, 0, 1)
+    #import pdb; pdb.set_trace()
+    perturbed_image = torch.clamp(perturbed_image, torch.min(image).item(), torch.max(image).item())
     # Return the perturbed image
     return perturbed_image
 
@@ -121,11 +123,10 @@ def test( model, device, test_loader, epsilon ):
         data_grad = data.grad.data
 
         # Call PGD Attack
-        perturbed_data = PGD_attack(data, epsilon, data_grad, 5)
+        #perturbed_data = PGD_attack(data, epsilon, data_grad, 5)
 
         # Call FGSM Attack
-        #perturbed_data = fgsm_attack(data, epsilon, data_grad)
-
+        perturbed_data = fgsm_attack(data, epsilon, data_grad)
         # Re-classify the perturbed image
         output = model(perturbed_data)
 
