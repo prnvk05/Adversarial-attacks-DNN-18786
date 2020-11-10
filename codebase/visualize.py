@@ -62,3 +62,7 @@ imshow(torchvision.utils.make_grid(torch.from_numpy(mynewlist2[0][4][3])))
 
 
 # %%
+import numpy as np
+load_accuracies = np.load('/root/Adversarial-attacks-DNN-18786/PGD_DATA/alpha_accuracies_pgd.npy')
+adv_examples = np.load('/root/Adversarial-attacks-DNN-18786/PGD_DATA/alpha_adv_examples_pgd.npy')
+alpha_epsilon_pgd = np.load('/root/Adversarial-attacks-DNN-18786/PGD_DATA/alpha_epsilons_pgd.npy')
