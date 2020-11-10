@@ -19,15 +19,15 @@ device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
 #%%
 model = resnet32().cuda()
 model.eval()
-checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-d509ac18.th')
+checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-adv')
 
-state_dict = checkpoint['state_dict']
+state_dict = checkpoint['model_state_dict']
 
-new_state_dict = OrderedDict()
-for k, v in state_dict.items():
-    name = k[7:] # remove `module.`
-    new_state_dict[name] = v
-model.load_state_dict(new_state_dict)
+# new_state_dict = OrderedDict()
+# for k, v in state_dict.items():
+#     name = k[7:] # remove `module.`
+#     new_state_dict[name] = v
+model.load_state_dict(state_dict)
 
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -101,12 +101,7 @@ def test( model, device, test_loader, epsilon ):
         output = model(data)
         init_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
 
-        # import pd
-        # b; pdb.set_trace()
-        # If the initial prediction is wrong, dont bother attacking, just move on
-        # print(init_pred,target)
-        # init_pred = init_pred
-        # print(init_pred,target)
+
         if init_pred.item() != target.item():
             continue
 
@@ -153,7 +148,7 @@ def test( model, device, test_loader, epsilon ):
 
 accuracies = []
 examples = []
-epsilons = [0.2]
+epsilons = [0.00]
 
 # Run test for each epsilon
 for eps in epsilons:
@@ -165,23 +160,29 @@ for eps in epsilons:
 
 
 # #%%
-import pickle
+# import pickle
 
-with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'wb') as f:
-    pickle.dump(examples, f)
+# with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'wb') as f:
+#     pickle.dump(examples, f)
+# # %%
+# with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'rb') as f:
+#     mynewlist = pickle.load(f)
+# # %%
+# #%%
+# import matplotlib.pyplot as plt
+# epsilons = [0,0.05,0.1,0.15,0.2,0.25,0.3]
+# acc_f = [0.9263,0.3011,0.197,0.1503,0.1237,0.1092,0.1002]
+# plt.grid()
+# plt.axis([0,0.3,0,1])
+# plt.xlabel('epsilon')
+# plt.ylabel('accuracy')
+# plt.plot(epsilons,acc_f)
+# plt.title('FGSM Attack')
+# plt.savefig('/root/Adversarial-attacks-DNN-18786/pics/plot.png')
 # %%
-with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'rb') as f:
-    mynewlist = pickle.load(f)
-# %%
-#%%
-import matplotlib.pyplot as plt
-epsilons = [0,0.05,0.1,0.15,0.2,0.25,0.3]
-acc_f = [0.9263,0.3011,0.197,0.1503,0.1237,0.1092,0.1002]
-plt.grid()
-plt.axis([0,0.3,0,1])
-plt.xlabel('epsilon')
-plt.ylabel('accuracy')
-plt.plot(epsilons,acc_f)
-plt.title('FGSM Attack')
-plt.savefig('/root/Adversarial-attacks-DNN-18786/pics/plot.png')
+################################
+# eps 
+#
+#
+
 # %%

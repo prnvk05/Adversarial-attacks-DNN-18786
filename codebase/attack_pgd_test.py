@@ -19,15 +19,15 @@ device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
 #%%
 model = resnet32().cuda()
 model.eval()
-checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-d509ac18.th')
+checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-adv')
 
-state_dict = checkpoint['state_dict']
+state_dict = checkpoint['model_state_dict']
 
-new_state_dict = OrderedDict()
-for k, v in state_dict.items():
-    name = k[7:] # remove `module.`
-    new_state_dict[name] = v
-model.load_state_dict(new_state_dict)
+# new_state_dict = OrderedDict()
+# for k, v in state_dict.items():
+#     name = k[7:] # remove `module.`
+#     new_state_dict[name] = v
+model.load_state_dict(state_dict)
 
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -212,13 +212,13 @@ def test( model, device, test_loader, epsilon ):
 accuracies = []
 examples = []
 epsilons = [0.05]
-alpha = [1/255, 2/255, 3/255, 4/255]
+alpha = [ 4/255]
 #Run test for each alpha
 for a in alpha:
     print("alpha val", a)
     acc, ex = pgd_test(model, device, val_loader, a, 0.05)
-    accuracies.append(acc)
-    examples.append(ex)
+    # accuracies.append(acc)
+    # examples.append(ex)
 # Run test for each epsilon
 #for eps in epsilons:
 #    print("running:",eps)
@@ -226,12 +226,12 @@ for a in alpha:
 #    #acc, ex = test(model, device, val_loader, eps)
 #    accuracies.append(acc)
 #    examples.append(ex)
-# %%
-import numpy as np
-#np.save('adv_examples.npy', np.array(examples))
-np.save('alpha_adv_examples_pgd.npy', np.array(examples))
-np.save('alpha_accuracies_pgd.npy', np.array(accuracies))
-np.save('alpha_epsilons_pgd.npy', np.array(epsilons))
+# # %%
+# import numpy as np
+# #np.save('adv_examples.npy', np.array(examples))
+# np.save('alpha_adv_examples_pgd.npy', np.array(examples))
+# np.save('alpha_accuracies_pgd.npy', np.array(accuracies))
+# np.save('alpha_epsilons_pgd.npy', np.array(epsilons))
 #%%
 #import pickle
 #
