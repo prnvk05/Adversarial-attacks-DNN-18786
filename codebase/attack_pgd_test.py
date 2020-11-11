@@ -76,7 +76,6 @@ def fgsm_attack(image, epsilon, data_grad):
     return perturbed_image
 
 # PGD attack code
-
 def pgd_attack(image,label,model,alpha,epsilon,steps):
     adv_img = image.clone()
     # adv_img.requires_grad = True
@@ -133,10 +132,6 @@ def pgd_test( model,model_inception, device, test_loader, alpha, epsilon):
         final_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
         if final_pred.item() == target.item():
             correct += 1
-            # Special case for saving 0 epsilon examples
-            #if (epsilon == 0) and (len(adv_examples) < 5):
-            #    adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-            #    adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
         else:
 
             adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
@@ -151,7 +146,7 @@ def pgd_test( model,model_inception, device, test_loader, alpha, epsilon):
     return final_acc, adv_examples
 
 
-def test( model, device, test_loader, epsilon ):
+def test(model, device, test_loader, epsilon):
 
     # Accuracy counter
     correct = 0
@@ -196,10 +191,6 @@ def test( model, device, test_loader, epsilon ):
         final_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
         if final_pred.item() == target.item():
             correct += 1
-            # Special case for saving 0 epsilon examples
-            #if (epsilon == 0) and (len(adv_examples) < 5):
-            #    adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-            #    adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
         else:
 
             adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
