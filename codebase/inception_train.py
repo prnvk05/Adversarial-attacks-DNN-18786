@@ -8,9 +8,9 @@ Original file is located at
 """
 
 # Commented out IPython magic to ensure Python compatibility.
-from google.colab import drive
-drive.mount('/content/drive')
-# % cd drive/My\ Drive/18786/
+# from google.colab import drive
+# drive.mount('/content/drive')
+# # % cd drive/My\ Drive/18786/
 
 import torch
 from PIL import Image
@@ -480,7 +480,7 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr= learningRate,
                                                                      steps_per_epoch=len(train_loader)//128,
                                                                      epochs= numEpochs)
 
-train(net, train_loader, val_loader)
+# train(net, train_loader, val_loader)
 
 
 

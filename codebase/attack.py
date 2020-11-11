@@ -14,8 +14,13 @@ from resnet import resnet32
 from collections import OrderedDict
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from inception_train import inception_v3
 
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
+#%%
+model_inception = inception_v3(device = 'cuda')
+chkp = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/incepv3.pkl')
+model_inception.load_state_dict(chkp)
 #%%
 model = resnet32().cuda()
 model.eval()
@@ -70,19 +75,9 @@ def fgsm_attack(image, epsilon, data_grad):
     # Return the perturbed image
     return perturbed_image
 
-# PGD attack code
-def PGD_attack(image, alpha, data_grad, step):
-    perturbed_image = image
-    for _ in range(step):
-        perturbed_image = perturbed_image*fgsm_attack(perturbed_image, 
-                                                      alpha, data_grad)
-
-    return perturbed_image
 
         
-    
-
-def test( model, device, test_loader, epsilon ):
+def test( model,model_inception, device, test_loader, epsilon ):
 
     # Accuracy counter
     correct = 0
@@ -100,7 +95,7 @@ def test( model, device, test_loader, epsilon ):
         # Forward pass the data through the model
         output = model(data)
         init_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
-
+        output_inception = model_inception(data)
         # import pd
         # b; pdb.set_trace()
         # If the initial prediction is wrong, dont bother attacking, just move on
@@ -111,10 +106,10 @@ def test( model, device, test_loader, epsilon ):
             continue
 
         # Calculate the loss
-        loss = F.nll_loss(output, target)
+        loss = F.nll_loss(output_inception, target)
 
         # Zero all existing gradients
-        model.zero_grad()
+        model_inception.zero_grad()
 
         # Calculate gradients of model in backward pass
         loss.backward()
@@ -153,35 +148,35 @@ def test( model, device, test_loader, epsilon ):
 
 accuracies = []
 examples = []
-epsilons = [0.2]
+epsilons = [0.10,0.15,0.20,0.25,0.3]
 
 # Run test for each epsilon
 for eps in epsilons:
     print("running:",eps)
-    acc, ex = test(model, device, val_loader, eps)
+    acc, ex = test(model,model_inception,device, val_loader, eps)
     accuracies.append(acc)
     examples.append(ex)
 # %%
 
 
-# #%%
-import pickle
+# # #%%
+# import pickle
 
-with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'wb') as f:
-    pickle.dump(examples, f)
-# %%
-with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'rb') as f:
-    mynewlist = pickle.load(f)
-# %%
-#%%
-import matplotlib.pyplot as plt
-epsilons = [0,0.05,0.1,0.15,0.2,0.25,0.3]
-acc_f = [0.9263,0.3011,0.197,0.1503,0.1237,0.1092,0.1002]
-plt.grid()
-plt.axis([0,0.3,0,1])
-plt.xlabel('epsilon')
-plt.ylabel('accuracy')
-plt.plot(epsilons,acc_f)
-plt.title('FGSM Attack')
-plt.savefig('/root/Adversarial-attacks-DNN-18786/pics/plot.png')
-# %%
+# with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'wb') as f:
+#     pickle.dump(examples, f)
+# # %%
+# with open('/root/Adversarial-attacks-DNN-18786/saved_model/adv_examples2.pkl', 'rb') as f:
+#     mynewlist = pickle.load(f)
+# # %%
+# #%%
+# import matplotlib.pyplot as plt
+# epsilons = [0,0.05,0.1,0.15,0.2,0.25,0.3]
+# acc_f = [0.9263,0.3011,0.197,0.1503,0.1237,0.1092,0.1002]
+# plt.grid()
+# plt.axis([0,0.3,0,1])
+# plt.xlabel('epsilon')
+# plt.ylabel('accuracy')
+# plt.plot(epsilons,acc_f)
+# plt.title('FGSM Attack')
+# plt.savefig('/root/Adversarial-attacks-DNN-18786/pics/plot.png')
+# # %%

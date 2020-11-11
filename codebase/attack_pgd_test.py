@@ -14,6 +14,11 @@ from resnet import resnet32
 from collections import OrderedDict
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from inception_train import inception_v3
+
+model_inception = inception_v3(device = 'cuda')
+chkp = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/incepv3.pkl')
+model_inception.load_state_dict(chkp)
 
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
 #%%
@@ -95,7 +100,7 @@ def pgd_attack(image,label,model,alpha,epsilon,steps):
     return adv_img
         
     
-def pgd_test( model, device, test_loader, alpha, epsilon):
+def pgd_test( model,model_inception, device, test_loader, alpha, epsilon):
 
     # Accuracy counter
     correct = 0
@@ -120,7 +125,7 @@ def pgd_test( model, device, test_loader, alpha, epsilon):
 
 
         # Call PGD Attack
-        perturbed_data = pgd_attack(data, target, model, alpha , epsilon, 5)
+        perturbed_data = pgd_attack(data, target, model_inception, alpha , epsilon, 5)
 
         output = model(perturbed_data)
 
@@ -212,13 +217,13 @@ def test( model, device, test_loader, epsilon ):
 accuracies = []
 examples = []
 epsilons = [0.05]
-alpha = [1/255, 2/255, 3/255, 4/255]
+alpha = [1/255]
 #Run test for each alpha
 for a in alpha:
     print("alpha val", a)
-    acc, ex = pgd_test(model, device, val_loader, a, 0.05)
-    accuracies.append(acc)
-    examples.append(ex)
+    acc, ex = pgd_test(model,model_inception, device, val_loader, a, 0.05)
+    # accuracies.append(acc)
+    # examples.append(ex)
 # Run test for each epsilon
 #for eps in epsilons:
 #    print("running:",eps)
@@ -226,12 +231,12 @@ for a in alpha:
 #    #acc, ex = test(model, device, val_loader, eps)
 #    accuracies.append(acc)
 #    examples.append(ex)
-# %%
-import numpy as np
-#np.save('adv_examples.npy', np.array(examples))
-np.save('alpha_adv_examples_pgd.npy', np.array(examples))
-np.save('alpha_accuracies_pgd.npy', np.array(accuracies))
-np.save('alpha_epsilons_pgd.npy', np.array(epsilons))
+# # %%
+# import numpy as np
+# #np.save('adv_examples.npy', np.array(examples))
+# np.save('alpha_adv_examples_pgd.npy', np.array(examples))
+# np.save('alpha_accuracies_pgd.npy', np.array(accuracies))
+# np.save('alpha_epsilons_pgd.npy', np.array(epsilons))
 #%%
 #import pickle
 #
