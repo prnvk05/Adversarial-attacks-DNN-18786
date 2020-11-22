@@ -18,9 +18,9 @@ from inception_train import inception_v3
 
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
 #%%
-model_inception = inception_v3(device = 'cuda')
-chkp = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/incepv3.pkl')
-model_inception.load_state_dict(chkp)
+# model_inception = inception_v3(device = 'cuda')
+# chkp = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/incepv3.pkl')
+# model_inception.load_state_dict(chkp)
 #%%
 model = resnet32().cuda()
 model.eval()
@@ -96,6 +96,7 @@ def test( model,model_inception, device, test_loader, epsilon ):
         output = model(data)
         init_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
         output_inception = model_inception(data)
+        
         # import pd
         # b; pdb.set_trace()
         # If the initial prediction is wrong, dont bother attacking, just move on
@@ -106,10 +107,12 @@ def test( model,model_inception, device, test_loader, epsilon ):
             continue
 
         # Calculate the loss
-        loss = F.nll_loss(output_inception, target)
+        # loss = F.nll_loss(output_inception, target)
+        loss = F.nll_loss(output,target)
 
         # Zero all existing gradients
-        model_inception.zero_grad()
+        # model_inception.zero_grad()
+        model.zero_grad()
 
         # Calculate gradients of model in backward pass
         loss.backward()
@@ -122,6 +125,7 @@ def test( model,model_inception, device, test_loader, epsilon ):
 
         # Call FGSM Attack
         perturbed_data = fgsm_attack(data, epsilon, data_grad)
+
         # Re-classify the perturbed image
         output = model(perturbed_data)
 
@@ -148,7 +152,8 @@ def test( model,model_inception, device, test_loader, epsilon ):
 
 accuracies = []
 examples = []
-epsilons = [0.10,0.15,0.20,0.25,0.3]
+# epsilons = [0.10,0.15,0.20,0.25,0.3]
+epsilons = [0.05]
 
 # Run test for each epsilon
 for eps in epsilons:

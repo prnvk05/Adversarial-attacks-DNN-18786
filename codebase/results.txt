@@ -1,0 +1,4 @@
+CUTOUT RESULTS:
+1 Random Cutout of 18X18 pixels -> Classification Accuracy on Test Dataset 74.9%
+10 Random Cutout of 5X5 pixels -> Classification Accuracy on Test Dataset 56.18%
+5 Random Cutout of 5X5 pixels -> Classification Accuracy on Test Dataset 77.83%
