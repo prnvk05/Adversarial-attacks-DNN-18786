@@ -190,7 +190,7 @@ y_8_cut = np.array([
  0.1663,
  0.1537,
  0.1537,
- 0.1402,,
+ 0.1402,
  0.1402,
  0.1268,
  0.1268])
@@ -217,9 +217,9 @@ y_18_cut = np.array([
  0.1081
 ])
 x = np.arange(1, 20, 1)
-plt.plot(x, y1, label = '18 cut-outs')
-plt.plot(x, y2, label = '8 cut-outs')
-plt.plot(x, y3, label = '2 cut-outs')
+plt.plot(x, y_18_cut, label = '18 cut-outs')
+plt.plot(x, y_8_cut, label = '8 cut-outs')
+plt.plot(x, y_2_cut, label = '2 cut-outs')
 # xnew = np.linspace(x.min(), x.max(), 300)
 # plt.plot(xnew, smooth(x, y1), label = '18')
 # plt.plot(xnew, smooth(x, y2), label = '7')
