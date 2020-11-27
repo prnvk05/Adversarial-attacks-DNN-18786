@@ -1,3 +1,4 @@
+### INPAINTED
 7 tensor([2], device='cuda:0') tensor([4], device='cuda:0')
 9 tensor([0], device='cuda:0') tensor([8], device='cuda:0')
 10 tensor([3], device='cuda:0') tensor([9], device='cuda:0')
@@ -9,12 +10,17 @@
 23 tensor([0], device='cuda:0') tensor([2], device='cuda:0')
 29 tensor([8], device='cuda:0') tensor([0], device='cuda:0')
 0.6875
+
+### ORIGINAL
 4 tensor([0], device='cuda:0') tensor([8], device='cuda:0')
 9 tensor([0], device='cuda:0') tensor([8], device='cuda:0')
 11 tensor([0], device='cuda:0') tensor([9], device='cuda:0')
 18 tensor([3], device='cuda:0') tensor([5], device='cuda:0')
 28 tensor([2], device='cuda:0') tensor([4], device='cuda:0')
 0.84375
+
+
+### CUTOUT
 0 tensor([0], device='cuda:0') tensor([2], device='cuda:0')
 2 tensor([3], device='cuda:0') tensor([6], device='cuda:0')
 4 tensor([0], device='cuda:0') tensor([8], device='cuda:0')
