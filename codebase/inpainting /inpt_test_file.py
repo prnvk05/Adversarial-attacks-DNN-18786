@@ -71,6 +71,8 @@ class custom_loader():
 adv_examples_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_images_fgsm.npz', allow_pickle  = True)['arr_0']
 adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_labels_fgsm.npz', allow_pickle = True)['arr_0']
 
+# adv_examples_inpainted = np.load('/root/test_adv_inpainted10k.npz', allow_pickle = True)['arr_0']
+# adv_examples_labels = np.load('/root/label_adv_inpainted10k.npz', allow_pickle = True)['arr_0']
 
 # og_examples_format = og_
 # inpaint_examples_format = inpaint_examples
@@ -80,6 +82,8 @@ adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase
 # custom_dataset_inpt = custom_loader(inpaint_examples_format, inpaint_labels_format)
 # custom_dataset_og = custom_loader(og_examples_format, inpaint_labels_format)
 # custom_dataset_cutout = custom_loader(og_examples_format, inpaint_labels_format, cutout=True)
+custom_dataset_adv_cutout = custom_loader(adv_examples_cutout_format, adv_labels_cutout_format, cutout = True, i = 18, j = 2)
+# custom_dataset_adv_inpainted = custom_loader(adv_examples_inpainted, adv_examples_labels)
 # test_loader_inpt = torch.utils.data.DataLoader(custom_dataset_inpt,
 #     batch_size=128, shuffle=False,
 #     num_workers=4, pin_memory=True)
@@ -91,6 +95,10 @@ adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase
 # test_loader_cutout = torch.utils.data.DataLoader(custom_dataset_cutout, batch_size = 128, 
 #                                                 shuffle = False, num_workers = 4, pin_memory = True)
 
+# test_loader_adv_cutouts = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, shuffle = False, num_workers = 4, pin_memory = True)
+
+# test_loader_adv_inpainted = torch.utils.data.DataLoader(custom_dataset_adv_inpainted, batch_size = 128, shuffle = False, 
+                                                        # num_workers = 4, pin_memory = True)
 # %%
 
 samples = []
@@ -112,6 +120,7 @@ def validation(model,valid_dataloader):
 #   model.train()
   return top1_accuracy/total
 
+### GRID SEARCH
 # accs = []
 # for i in range(1, 20):
 #     for j in range(1, 20):
@@ -120,19 +129,26 @@ def validation(model,valid_dataloader):
 #         test_loader_adv_cutouts = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, 
 #                                                 shuffle = False, num_workers = 4, pin_memory = True)
 
-custom_dataset_adv_cutout = custom_loader(adv_examples_cutout_format, adv_labels_cutout_format, cutout = True, i = 18, j = 2)
-test_loader_adv_cutouts = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, shuffle = False, num_workers = 4, pin_memory = True)
 
 
 # print("inpainted:", validation(model, test_loader_inpt))
 # print("original:", validation(model, test_loader_og))
 # print("cutout:", validation(model, test_loader_cutout))
-result = validation(model, test_loader_adv_cutouts)
+result = validation(model, test_loader_adv_inpainted)
 # print("cutout adv:", i,j,result)
 # accs.append((i,j,result))
 print(result)
 
 # %% plot acc
+from scipy.interpolate import make_interp_spline, BSpline
+import numpy as np
+import matplotlib.pyplot as plt
+
+def smooth(x, y):
+    xnew = np.linspace(x.min(), x.max(), 300) 
+    spl = make_interp_spline(x, y, k=3)  # type: BSpline
+    power_smooth = spl(xnew)
+    return power_smooth
 
 y1 = np.array([0.3095, 0.3933, 0.3933, 0.3258, 0.3258, 0.1768, 0.1768, 0.1301, 0.1301, 0.1247,
             0.1247, 0.1192, 0.1192, 0.1118, 0.1118, 0.1112, 0.1112, 0.1081, 0.1081])
@@ -160,8 +176,12 @@ y3 = [
  0.1541
 ]
 x = np.arange(1, 20, 1)
+xnew = np.linspace(x.min(), x.max(), 300)
+plt.plot(xnew, smooth(x, y1))
+plt.plot(xnew, smooth(x, y2))
+plt.plot(xnew, smooth(x, y3))
 
-plt.plot(x, y1)
-plt.plot(x, y2)
-plt.plot(x, y3)
+# plt.plot(xnew, power_smooth)
+# plt.plot(x, y2)
+# plt.plot(x, y3)
 plt.show()
