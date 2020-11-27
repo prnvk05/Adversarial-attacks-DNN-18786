@@ -177,10 +177,11 @@ y3 = [
 ]
 x = np.arange(1, 20, 1)
 xnew = np.linspace(x.min(), x.max(), 300)
-plt.plot(xnew, smooth(x, y1))
-plt.plot(xnew, smooth(x, y2))
-plt.plot(xnew, smooth(x, y3))
-
+plt.plot(xnew, smooth(x, y1), label = '18')
+plt.plot(xnew, smooth(x, y2), label = '7')
+plt.plot(xnew, smooth(x, y3), label = '8')
+plt.legend()
+plt.grid()
 # plt.plot(xnew, power_smooth)
 # plt.plot(x, y2)
 # plt.plot(x, y3)
