@@ -400,3 +400,15 @@ cutout adv: 19 16 0.1059
 cutout adv: 19 17 0.1059
 cutout adv: 19 18 0.1028
 cutout adv: 19 19 0.1028
+
+
+####
+1. Original inpainted (without adversarial noise) - test (small sample and big sample)
+2. Cut-out without noise  - test (small sample and big sample) [cut-out had better result on small sample, big sample same result]
+3. Generated 10k FGSM Adversarial examples, performed cut-out and grid search for best number of holes vs. size of hole (30% -> 39.33%) (18, 2)
+
+To Do:
+Try with inpainted adversarial images (18, 2)
+Try with inception net 
+Try Denoising (?)
+
