@@ -30,3 +30,8 @@
 18 tensor([3], device='cuda:0') tensor([5], device='cuda:0')
 28 tensor([2], device='cuda:0') tensor([4], device='cuda:0')
 0.75
+
+# 10 K IMG
+inpainted: 0.7096354166666666
+original: 0.9262820512820513
+cutout: 0.7105368589743589
