@@ -84,8 +84,8 @@ def test( model, device, test_loader, epsilon ):
         # Forward pass the data through the model
         output = model(data)
         init_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
-        if init_pred.item() != target.item():
-            continue
+        # if init_pred.item() != target.item():
+        #     continue
         # Calculate the loss
         loss = F.nll_loss(output, target)
         # Zero all existing gradients
@@ -102,10 +102,10 @@ def test( model, device, test_loader, epsilon ):
         final_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
         if final_pred.item() == target.item():
             correct += 1
-        else:
-            adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-            data_ex = data.squeeze().detach().cpu().numpy()
-            adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
+        
+        adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
+        data_ex = data.squeeze().detach().cpu().numpy()
+        adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
     # Calculate final accuracy for this epsilon
     final_acc = correct/float(len(test_loader))
     print("Epsilon: {}\tTest Accuracy = {} / {} = {}".format(epsilon, correct, len(test_loader), final_acc))
@@ -114,10 +114,10 @@ def test( model, device, test_loader, epsilon ):
 
 
 
-
+# %%
 accuracies = []
 examples = []
-epsilons = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
+epsilons = [0.05]
 
 # Run test for each epsilon
 for eps in epsilons:
@@ -126,6 +126,29 @@ for eps in epsilons:
     accuracies.append(acc)
     examples.append(ex)
 print("Done FGSM!")
+
+# %%
+
+
+# %%
+import numpy as np
+inv_normalize = transforms.Normalize(
+    mean=[-0.485/0.229, -0.456/0.224, -0.406/0.255],
+    std=[1/0.229, 1/0.224, 1/0.255]
+)
+
+def pre_process(im):
+    im = inv_normalize(torch.Tensor(im)).numpy()
+    im = np.clip(im, 0, 1)
+    im = np.transpose(im, (1, 2, 0))
+    # im = im*255
+    # im = im.astype(np.uint8)
+    return im
+
+# %%
+labels = np.array([ex[0] for ex in examples[0]])
+imgs = np.array([pre_process(ex[3]) for ex in examples[0]])
+
 
 # #%%
 # import pickle
