@@ -36,6 +36,11 @@ inpainted: 0.7096354166666666
 original: 0.9262820512820513
 cutout: 0.7105368589743589
 
+#10 K IMG Adversarial
+original: 32.84%
+inpainted: 43.55%
+
+
 
 ### CUTOUT RESULT ON ADVERS (I, J)
 
