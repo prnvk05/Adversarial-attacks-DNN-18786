@@ -13,7 +13,7 @@ from inpt_test_resnet import resnet32
 from collections import OrderedDict
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-from inpt_loader import val_set
+# from inpt_loader import val_set
 import numpy as np
 import matplotlib.pyplot as plt
 from cutout import Cutout
@@ -68,11 +68,12 @@ class custom_loader():
 # og_examples_format = np.load('/root/og_images10k.npz', allow_pickle = True)['arr_0']
 # inpaint_examples_format = np.load('/root/test_inpainted10k.npz', allow_pickle = True)['arr_0']
 # inpaint_labels = np.load('/root/label_inpainted10k.npz', allow_pickle = True)['arr_0']
-adv_examples_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_images_fgsm.npz', allow_pickle  = True)['arr_0']
-adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_labels_fgsm.npz', allow_pickle = True)['arr_0']
+# adv_examples_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_images_fgsm.npz', allow_pickle  = True)['arr_0']
+# adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_labels_fgsm.npz', allow_pickle = True)['arr_0']
 
-# adv_examples_inpainted = np.load('/root/test_adv_inpainted10k.npz', allow_pickle = True)['arr_0']
-# adv_examples_labels = np.load('/root/label_adv_inpainted10k.npz', allow_pickle = True)['arr_0']
+adv_examples_og = np.load('/root/og_adv_spots_images10k.npz', allow_pickle = True)['arr_0']
+adv_examples_inpainted = np.load('/root/test_adv_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
+adv_examples_labels = np.load('/root/label_adv_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
 
 # og_examples_format = og_
 # inpaint_examples_format = inpaint_examples
@@ -82,8 +83,8 @@ adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase
 # custom_dataset_inpt = custom_loader(inpaint_examples_format, inpaint_labels_format)
 # custom_dataset_og = custom_loader(og_examples_format, inpaint_labels_format)
 # custom_dataset_cutout = custom_loader(og_examples_format, inpaint_labels_format, cutout=True)
-custom_dataset_adv_cutout = custom_loader(adv_examples_cutout_format, adv_labels_cutout_format, cutout = True, i = 18, j = 2)
-# custom_dataset_adv_inpainted = custom_loader(adv_examples_inpainted, adv_examples_labels)
+custom_dataset_adv_cutout = custom_loader(adv_examples_og, adv_examples_labels, cutout = True, i = 18, j = 2)
+# custom_dataset_adv_inpainted = custom_loader(adv_examples_og, adv_examples_labels)
 # test_loader_inpt = torch.utils.data.DataLoader(custom_dataset_inpt,
 #     batch_size=128, shuffle=False,
 #     num_workers=4, pin_memory=True)
@@ -95,10 +96,10 @@ custom_dataset_adv_cutout = custom_loader(adv_examples_cutout_format, adv_labels
 # test_loader_cutout = torch.utils.data.DataLoader(custom_dataset_cutout, batch_size = 128, 
 #                                                 shuffle = False, num_workers = 4, pin_memory = True)
 
-# test_loader_adv_cutouts = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, shuffle = False, num_workers = 4, pin_memory = True)
+test_loader_adv_cutout = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, shuffle = False, num_workers = 4, pin_memory = True)
 
 # test_loader_adv_inpainted = torch.utils.data.DataLoader(custom_dataset_adv_inpainted, batch_size = 128, shuffle = False, 
-                                                        # num_workers = 4, pin_memory = True)
+#                                                         num_workers = 4, pin_memory = True)
 # %%
 
 samples = []
@@ -134,7 +135,8 @@ def validation(model,valid_dataloader):
 # print("inpainted:", validation(model, test_loader_inpt))
 # print("original:", validation(model, test_loader_og))
 # print("cutout:", validation(model, test_loader_cutout))
-result = validation(model, test_loader_adv_inpainted)
+result = validation(model, test_loader_adv_cutout)
+
 # print("cutout adv:", i,j,result)
 # accs.append((i,j,result))
 print(result)
@@ -150,38 +152,82 @@ def smooth(x, y):
     power_smooth = spl(xnew)
     return power_smooth
 
-y1 = np.array([0.3095, 0.3933, 0.3933, 0.3258, 0.3258, 0.1768, 0.1768, 0.1301, 0.1301, 0.1247,
-            0.1247, 0.1192, 0.1192, 0.1118, 0.1118, 0.1112, 0.1112, 0.1081, 0.1081])
-y2 = np.array([0.3095, 0.3552, 0.3552, 0.359, 0.359, 0.2837, 0.2837, 0.2254, 0.2254, 0.1857, 0.1857,
-               0.1663, 0.1663, 0.1537, 0.1537, 0.1402, 0.1402, 0.1268, 0.1268])
-y3 = [
+y_2_cut = np.array([
  0.3095,
- 0.3429,
- 0.3429,
- 0.354,
- 0.354,
- 0.3157,
- 0.3157,
- 0.273,
- 0.273,
- 0.2387,
- 0.2387,
- 0.2177,
- 0.2177,
- 0.1965,
- 0.1965,
- 0.1758,
- 0.1758,
- 0.1541,
- 0.1541
-]
+ 0.3239,
+ 0.3239,
+ 0.3351,
+ 0.3351,
+ 0.3381,
+ 0.3381,
+ 0.3236,
+ 0.3236,
+ 0.3122,
+ 0.3122,
+ 0.2898,
+ 0.2898,
+ 0.2698,
+ 0.2698,
+ 0.2505,
+ 0.2505,
+ 0.2316,
+ 0.2316])
+
+
+y_8_cut = np.array([
+ 0.3095,
+ 0.3552,
+ 0.3552,
+ 0.359,
+ 0.359,
+ 0.2837,
+ 0.2837,
+ 0.2254,
+ 0.2254,
+ 0.1857,
+ 0.1857,
+ 0.1663,
+ 0.1663,
+ 0.1537,
+ 0.1537,
+ 0.1402,,
+ 0.1402,
+ 0.1268,
+ 0.1268])
+
+y_18_cut = np.array([
+ 0.3095,
+ 0.3933,
+ 0.3933,
+ 0.3258,
+ 0.3258,
+ 0.1768,
+ 0.1768,
+ 0.1301,
+ 0.1301,
+ 0.1247,
+ 0.1247,
+ 0.1192,
+ 0.1192,
+ 0.1118,
+ 0.1118,
+ 0.1112,
+ 0.1112,
+ 0.1081,
+ 0.1081
+])
 x = np.arange(1, 20, 1)
-xnew = np.linspace(x.min(), x.max(), 300)
-plt.plot(xnew, smooth(x, y1), label = '18')
-plt.plot(xnew, smooth(x, y2), label = '7')
-plt.plot(xnew, smooth(x, y3), label = '8')
+plt.plot(x, y1, label = '18 cut-outs')
+plt.plot(x, y2, label = '8 cut-outs')
+plt.plot(x, y3, label = '2 cut-outs')
+# xnew = np.linspace(x.min(), x.max(), 300)
+# plt.plot(xnew, smooth(x, y1), label = '18')
+# plt.plot(xnew, smooth(x, y2), label = '7')
+# plt.plot(xnew, smooth(x, y3), label = '8')
 plt.legend()
 plt.grid()
+plt.xlabel('px width of cut-out')
+plt.ylabel('acc %')
 # plt.plot(xnew, power_smooth)
 # plt.plot(x, y2)
 # plt.plot(x, y3)
