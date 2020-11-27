@@ -33,7 +33,7 @@ model.load_state_dict(new_state_dict)
 # %% DATA LOADER
 
 class custom_loader():
-    def __init__(self, dataset, label, cutout = False):
+    def __init__(self, dataset, label, cutout = False, i = 1, j = 18):
         self.dataset = []
         self.label = []
         self.cutout = cutout
@@ -43,7 +43,7 @@ class custom_loader():
         if self.cutout:
             self.transform = transforms.Compose([
                                                 transforms.ToTensor(),
-                                                normalize, Cutout(1, 18)
+                                                normalize, Cutout(i, j)
                                                 ])
         else:
             self.transform = transforms.Compose([
@@ -65,49 +65,103 @@ class custom_loader():
         image = self.transform(image)
         return image, torch.as_tensor(label).long()
 
-og_examples_format = np.load('/root/Adversarial-attacks-DNN-18786/Inpainting_experiment/test_data/og_images.npy', allow_pickle = True)
-inpaint_examples = np.load('/root/Adversarial-attacks-DNN-18786/Inpainting_experiment/test_data/test_inpainted.npy', allow_pickle = True)
-inpaint_labels = np.load('/root/Adversarial-attacks-DNN-18786/Inpainting_experiment/test_data/label_inpainted.npy', allow_pickle = True)
-
-# og_examples_format = og_examples.squeeze(1)
-inpaint_examples_format = inpaint_examples.squeeze(1)
-inpaint_labels_format = inpaint_labels.squeeze(1)
+# og_examples_format = np.load('/root/og_images10k.npz', allow_pickle = True)['arr_0']
+# inpaint_examples_format = np.load('/root/test_inpainted10k.npz', allow_pickle = True)['arr_0']
+# inpaint_labels = np.load('/root/label_inpainted10k.npz', allow_pickle = True)['arr_0']
+adv_examples_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_images_fgsm.npz', allow_pickle  = True)['arr_0']
+adv_labels_cutout_format = np.load('/root/Adversarial-attacks-DNN-18786/codebase/adv_labels_fgsm.npz', allow_pickle = True)['arr_0']
 
 
-custom_dataset_inpt = custom_loader(inpaint_examples_format, inpaint_labels_format)
-custom_dataset_og = custom_loader(og_examples_format, inpaint_labels_format)
-custom_dataset_cutout = custom_loader(og_examples_format, inpaint_labels_format, cutout=True)
+# og_examples_format = og_
+# inpaint_examples_format = inpaint_examples
+# inpaint_labels_format = inpaint_labels
 
-test_loader_inpt = torch.utils.data.DataLoader(custom_dataset_inpt,
-    batch_size=1, shuffle=False,
-    num_workers=4, pin_memory=True)
+# %%
+# custom_dataset_inpt = custom_loader(inpaint_examples_format, inpaint_labels_format)
+# custom_dataset_og = custom_loader(og_examples_format, inpaint_labels_format)
+# custom_dataset_cutout = custom_loader(og_examples_format, inpaint_labels_format, cutout=True)
+# test_loader_inpt = torch.utils.data.DataLoader(custom_dataset_inpt,
+#     batch_size=128, shuffle=False,
+#     num_workers=4, pin_memory=True)
 
-test_loader_og = torch.utils.data.DataLoader(custom_dataset_og,
-    batch_size=1, shuffle=False,
-    num_workers=4, pin_memory=True)
+# test_loader_og = torch.utils.data.DataLoader(custom_dataset_og,
+#     batch_size=128, shuffle=False,
+#     num_workers=4, pin_memory=True)
 
-test_loader_cutout = torch.utils.data.DataLoader(custom_dataset_cutout, batch_size = 1, 
-                                                shuffle = False, num_workers = 4, pin_memory = True)
+# test_loader_cutout = torch.utils.data.DataLoader(custom_dataset_cutout, batch_size = 128, 
+#                                                 shuffle = False, num_workers = 4, pin_memory = True)
+
 # %%
 
+samples = []
 def validation(model,valid_dataloader):
   model.eval()
   top1_accuracy = 0
   total = 0
   for batch_num,(feats,label) in enumerate(valid_dataloader):
+    samples.append(feats)
     feats = feats.cuda().float()
     label = label.cuda()
     valid_output=model(feats)
     predictions = F.softmax(valid_output, dim=1)
     _, top1_pred_labels = torch.max(predictions,1)
-    if top1_pred_labels != label:
-        print(batch_num, top1_pred_labels, label)
+    # if top1_pred_labels != label:
+    #     print(batch_num, top1_pred_labels, label)
     top1_accuracy += torch.sum(torch.eq(top1_pred_labels, label)).item()
     total += len(label)
 #   model.train()
   return top1_accuracy/total
 
+# accs = []
+# for i in range(1, 20):
+#     for j in range(1, 20):
+#         custom_dataset_adv_cutout = custom_loader(adv_examples_cutout_format, adv_labels_cutout_format, cutout = True, i = i, j = j)
 
-print(validation(model, test_loader_inpt))
-print(validation(model, test_loader_og))
-print(validation(model, test_loader_cutout))
+#         test_loader_adv_cutouts = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, 
+#                                                 shuffle = False, num_workers = 4, pin_memory = True)
+
+custom_dataset_adv_cutout = custom_loader(adv_examples_cutout_format, adv_labels_cutout_format, cutout = True, i = 18, j = 2)
+test_loader_adv_cutouts = torch.utils.data.DataLoader(custom_dataset_adv_cutout, batch_size = 128, shuffle = False, num_workers = 4, pin_memory = True)
+
+
+# print("inpainted:", validation(model, test_loader_inpt))
+# print("original:", validation(model, test_loader_og))
+# print("cutout:", validation(model, test_loader_cutout))
+result = validation(model, test_loader_adv_cutouts)
+# print("cutout adv:", i,j,result)
+# accs.append((i,j,result))
+print(result)
+
+# %% plot acc
+
+y1 = np.array([0.3095, 0.3933, 0.3933, 0.3258, 0.3258, 0.1768, 0.1768, 0.1301, 0.1301, 0.1247,
+            0.1247, 0.1192, 0.1192, 0.1118, 0.1118, 0.1112, 0.1112, 0.1081, 0.1081])
+y2 = np.array([0.3095, 0.3552, 0.3552, 0.359, 0.359, 0.2837, 0.2837, 0.2254, 0.2254, 0.1857, 0.1857,
+               0.1663, 0.1663, 0.1537, 0.1537, 0.1402, 0.1402, 0.1268, 0.1268])
+y3 = [
+ 0.3095,
+ 0.3429,
+ 0.3429,
+ 0.354,
+ 0.354,
+ 0.3157,
+ 0.3157,
+ 0.273,
+ 0.273,
+ 0.2387,
+ 0.2387,
+ 0.2177,
+ 0.2177,
+ 0.1965,
+ 0.1965,
+ 0.1758,
+ 0.1758,
+ 0.1541,
+ 0.1541
+]
+x = np.arange(1, 20, 1)
+
+plt.plot(x, y1)
+plt.plot(x, y2)
+plt.plot(x, y3)
+plt.show()
