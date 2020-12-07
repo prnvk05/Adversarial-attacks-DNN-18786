@@ -81,8 +81,60 @@ df.to_csv('/root/Adversarial-attacks-DNN-18786/saved_model/confusion_matrix.csv'
 # %%
 
 ## Generating CF for Inception Model
-model_inception = inception_v3(device = 'cuda')
-chkp = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/incepv3.pkl')
-model_inception.load_state_dict(chkp)
+# model = inception_v3(device = 'cuda')
+# chkp = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/incepv3.pkl')
+# model.load_state_dict(chkp)
+
+# device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
+# normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+#                                      std=[0.229, 0.224, 0.225])
+
+# val_loader = torch.utils.data.DataLoader(
+#     datasets.CIFAR10(root='./data',download=True, train=False, transform=transforms.Compose([
+#         transforms.ToTensor(),
+#         normalize,
+#     ])),
+#     batch_size=1, shuffle=False,
+#     num_workers=4, pin_memory=True)
+
+# target_labels = []
+# predicted_labels = []
+
+# target_labels = []
+# predicted_labels = []
+
+
+# def validation(model,valid_dataloader):
+#   model.eval()
+#   top1_accuracy = 0
+#   total = 0
+#   for batch_num,(feats,label) in enumerate(valid_dataloader):
+#     feats = feats.cuda()
+#     label = label.cuda()
+#     valid_output=model(feats)
+#     predictions = F.softmax(valid_output, dim=1)
+#     _, top1_pred_labels = torch.max(predictions,1)
+#     top1_accuracy += torch.sum(torch.eq(top1_pred_labels, label)).item()
+#     target_labels.append(label.item())
+#     predicted_labels.append(top1_pred_labels.item())
+#     total += len(label)
+#   model.train()
+#   return top1_accuracy/total
+
+
+# print("validation Acc is :",validation(model,val_loader))
+
+# labels = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+# cm = confusion_matrix(target_labels, predicted_labels)
+# plt.figure(figsize=(9,9))
+# sns.heatmap(cm,cmap=plt.cm.Blues,annot = True,fmt="d",xticklabels=labels, yticklabels=labels)
+# plt.xlabel("Predicted")
+# plt.ylabel("Actual")
+# plt.show()
+
+# df = pd.DataFrame(cm)
+# #%%
+# df.to_csv('/root/Adversarial-attacks-DNN-18786/saved_model/confusion_matrix_inceptionv3.csv', index = False)
+
 
 # %%
