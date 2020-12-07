@@ -66,18 +66,23 @@ class custom_loader():
         return image, torch.as_tensor(label).long()
 
 ### ORIGINAL & INPAINTED WITHOUT NOISE
-og_examples_format = np.load('/root/og_new_spots_images10k.npz', allow_pickle = True)['arr_0']
-og_labels_format = np.load('/root/label_new_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
+# og_examples_format = np.load('/root/og_new_spots_images10k.npz', allow_pickle = True)['arr_0']
+# og_labels_format = np.load('/root/label_new_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
 
-inpaint_examples_format = np.load('/root/test_new_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
-inpaint_labels = np.load('/root/label_new_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
+# inpaint_examples_format = np.load('/root/test_new_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
+# inpaint_labels = np.load('/root/label_new_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
 
-### ORIGINAL & INPAINTED WITH ADVERSARIAL NOISE
-og_adv_examples_format = np.load('/root/og_newadv_spots_images10k.npz', allow_pickle=True)['arr_0']
-og_adv_labels_format = np.load('/root/label_newadv_spots_inpainted10k.npz', allow_pickle=True)['arr_0']
+# ### ORIGINAL & INPAINTED WITH ADVERSARIAL NOISE
+# og_adv_examples_format = np.load('/root/og_newadv_spots_images10k.npz', allow_pickle=True)['arr_0']
+# og_adv_labels_format = np.load('/root/label_newadv_spots_inpainted10k.npz', allow_pickle=True)['arr_0']
 
-adv_inpainted_examples_format = np.load('/root/test_newadv_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
-adv_inpainted_labels_format = np.load('/root/ly10k.npz', allow_pickle = True)['arr_0']
+# adv_inpainted_examples_format = np.load('/root/test_newadv_spots_inpainted10k.npz', allow_pickle = True)['arr_0']
+# adv_inpainted_labels_format = np.load('/root/ly10k.npz', allow_pickle = True)['arr_0']
+
+
+### FIRST DENOISE THEN INPAINT
+denoise_adv_inpaint_examples = np.load('/root/test_advdenoised_50spots_inp.npz', allow_pickle = True)['arr_0']
+denoise_adv_inpaint_labels = np.load('/root/label_advdenoised_50spots_inp.npz', allow_pickle = True)['arr_0']
 
 
 
@@ -113,6 +118,11 @@ adv_inpainted_labels_format = np.load('/root/ly10k.npz', allow_pickle = True)['a
 #     batch_size=128, shuffle=False,
 #     num_workers=4, pin_memory=True)
 
+
+### ADV + DENOISE
+custom_dataset_denoise_adv_inpaint = custom_loader(denoise_adv_inpaint_examples, denoise_adv_inpaint_labels)
+denoise_adv_inpaint_TESTLOADER =  torch.utils.data.DataLoader(custom_dataset_denoise_adv_inpaint,
+                                                                              batch_size = 128, shuffle=False, num_workers =4, pin_memory = True)
 
 
 
@@ -152,19 +162,20 @@ def validation(model,valid_dataloader):
   return top1_accuracy/total
 
 ### GRID SEARCH
-accs = []
-for i in range(30, 50):
-    # for j in range(1,):
-    custom_dataset_adv_cutout = custom_loader(og_adv_examples_format, og_adv_labels_format, cutout = True, i = i, j = 2)
-    test_loader_adv_cutout_noise = torch.utils.data.DataLoader(custom_dataset_adv_cutout,
-        batch_size=128, shuffle=False,
-        num_workers=4, pin_memory=True)
+# accs = []
+# for i in range(30, 50):
+#     # for j in range(1,):
+#     custom_dataset_adv_cutout = custom_loader(og_adv_examples_format, og_adv_labels_format, cutout = True, i = i, j = 2)
+#     test_loader_adv_cutout_noise = torch.utils.data.DataLoader(custom_dataset_adv_cutout,
+#         batch_size=128, shuffle=False,
+#         num_workers=4, pin_memory=True)
     
-    result_cutout_noise = validation(model, test_loader_adv_cutout_noise)
-    print(i, 2, result_cutout_noise)
+#     result_cutout_noise = validation(model, test_loader_adv_cutout_noise)
+#     print(i, 2, result_cutout_noise)
         
 
-
+result = validation(model, denoise_adv_inpaint_TESTLOADER)
+print(result)
 #### RESULT WITHOUT ADV NOISE
 # result_inpainted_nonoise = validation(model, test_loader_inpt_nonoise)
 # result_cutout_nonoise = validation(model, test_loader_cutout_nonoise)
