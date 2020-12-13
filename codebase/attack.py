@@ -92,24 +92,20 @@ class PGD(Attack):
             final_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
             if final_pred.item() == target.item():
                 correct += 1
-            else:
 
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                data_ex = data.squeeze().detach().cpu().numpy()
-                adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
+
+            adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
+            data_ex = data.squeeze().detach().cpu().numpy()
+            adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
 
         # Calculate final accuracy for this epsilon
         final_acc = correct/float(len(self.dataloader))
-        print("Epsilon: {}, Alpha: {}\tTest Accuracy = {}".format(self.epsilon, self.alpha,  final_acc))
-
-        # Return the accuracy and an adversarial example
         return final_acc, adv_examples   
 
-class FGSM:
-   def __init__(self,dataloader, epsilon, steps = 5):
+class FGSM(Attack):
+    def __init__(self, dataloader, epsilon):
         super().__init__(dataloader)
         self.epsilon = epsilon
-        self.steps = steps
         self.dataloader = dataloader     
 
     def attack(self, image, epsilon, data_grad):
@@ -121,7 +117,6 @@ class FGSM:
         perturbed_image = torch.clamp(perturbed_image, torch.min(image).item(), torch.max(image).item())
         # Return the perturbed image
         return perturbed_image 
-
 
     def test(self):
 
@@ -162,8 +157,6 @@ class FGSM:
             adv_examples.append((target.item(),init_pred.item(), final_pred.item(), adv_ex,data_ex))
         # Calculate final accuracy for this epsilon
         final_acc = correct/float(len(self.dataloader))
-        print("Epsilon: {}\tTest Accuracy = {} / {} = {}".format(self.epsilon, correct, self.dataloader, final_acc))
-        # Return the accuracy and an adversarial example
         return final_acc, adv_examples
 
 # %%
@@ -180,3 +173,4 @@ val_loader = torch.utils.data.DataLoader(
     batch_size=1, shuffle=False,
     num_workers=4, pin_memory=True)
 pgdatk = PGD(val_loader, 0.05, 4/255, 5)
+fgsmatk = FGSM(val_loader, 0.05)
