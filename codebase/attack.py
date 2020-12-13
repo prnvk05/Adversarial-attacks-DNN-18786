@@ -15,7 +15,9 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 # %%
 
-class PGD():
+class Attack:
+
+class PGD:
     def __init__(self, dataloader, epsilon, alpha, steps=5):
         self.epsilon = epsilon
         self.alpha = alpha
@@ -95,12 +97,12 @@ class PGD():
 
         # Calculate final accuracy for this epsilon
         final_acc = correct/float(len(self.dataloader))
-        print("Epsilon: {}\tTest Accuracy = {}".format(final_acc))
+        print("Epsilon: {}, Alpha: {}\tTest Accuracy = {}".format(self.epsilon, self.alpha,  final_acc))
 
         # Return the accuracy and an adversarial example
         return final_acc, adv_examples   
 
-class FGSM():
+class FGSM:
     def __init__(self, dataloader, epsilon):
         self.epsilon = epsilon
         self.dataloader = dataloader
