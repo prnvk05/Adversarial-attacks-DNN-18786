@@ -25,8 +25,13 @@ val_loader = torch.utils.data.DataLoader(
     batch_size=1, shuffle=False,
     num_workers=4, pin_memory=True)
 
-# fgsmatk = FGSM(val_loader, 0.05)
-# pgdatk = PGD(val_loader, 0.05, 4/255, steps = 5)
+fgsmatk = FGSM(val_loader, 0.05)
+pgdatk = PGD(val_loader, 0.05, 4/255, steps = 5)
 # final_acc, _ = fgsmatk.test()
 # final_acc,_ = pgdatk.test()
+
+
+
+# %%
+
 # %%
