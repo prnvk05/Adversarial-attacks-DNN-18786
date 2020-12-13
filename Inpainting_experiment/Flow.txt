@@ -1,4 +1,0 @@
-Just for personal reference.
-The proposed experiment flow is to mask the incoming images and perform inpainting operation on the same.
-Areas to focus on is to verify if the neural network used for performing image inpainting works well on adversarial images, this is a little fuzzy because to use
-neighboring pixel information for image completion, the effect of adversarial noise is a little unclear.
