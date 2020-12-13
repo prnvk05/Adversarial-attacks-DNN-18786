@@ -16,13 +16,8 @@ import torchvision.transforms as transforms
 # %%
 
 class Attack:
-
-class PGD:
-    def __init__(self, dataloader, epsilon, alpha, steps=5):
-        self.epsilon = epsilon
-        self.alpha = alpha
+    def __init__(self, dataloader):
         self.dataloader = dataloader
-        self.steps = steps
         self.device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
         self.model = resnet32().to(self.device)
         self.model.eval()
@@ -34,7 +29,33 @@ class PGD:
         for k, v in state_dict.items():
             name = k[7:] # remove `module.`
             new_state_dict[name] = v
-        self.model.load_state_dict(new_state_dict) 
+        self.model.load_state_dict(new_state_dict)
+
+class PGD(Attack):
+    def __init__(self,dataloader, epsilon, alpha, steps = 5):
+        super().__init__(dataloader)
+        self.epsilon = epsilon
+        self.alpha = alpha 
+        self.steps = steps
+        self.dataloader = dataloader
+    # def __init__(self, dataloader, epsilon, alpha, steps=5):
+    #     self.epsilon = epsilon
+    #     self.alpha = alpha
+    #     self.dataloader = dataloader
+    #     self.steps = steps
+    #     self.device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
+    #     self.model = resnet32().to(self.device)
+
+    #     self.model.eval()
+    #     checkpoint = torch.load('/root/Adversarial-attacks-DNN-18786/saved_model/resnet32-d509ac18.th')
+
+    #     state_dict = checkpoint['state_dict']
+
+    #     new_state_dict = OrderedDict()
+    #     for k, v in state_dict.items():
+    #         name = k[7:] # remove `module.`
+    #         new_state_dict[name] = v
+    #     self.model.load_state_dict(new_state_dict) 
     
     def attack(self, image, label):
         adv_img = image.clone()
@@ -187,6 +208,4 @@ val_loader = torch.utils.data.DataLoader(
     ])),
     batch_size=1, shuffle=False,
     num_workers=4, pin_memory=True)
-
-# fgsmatk = FGSM(val_loader, 0.05)
 pgdatk = PGD(val_loader, 0.05, 4/255, 5)
