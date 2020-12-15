@@ -6,4 +6,4 @@
    - Use attack_runner.py
    
 2) For validation of in-painted / denoised images 
-   - Use
+   - Use inpt_test_file.py 
